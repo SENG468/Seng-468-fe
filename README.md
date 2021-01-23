@@ -5,8 +5,9 @@ Front End for Seng 468 stock trading application
 To run the development server, follow the steps below:
 1. Navigate to the project root `/seng-468-fe`
 2. npm install
-3. npm start
-4. Application running on port 3000
+3. To mock out the endpoints, change the value of `mockStockeTrader` in `src/api/api.js` to `true`
+4. npm start
+5. Application running on port 3000
 
 ## Run using Docker:
 This method doesn't not support hot reloading so for development, the above method is preferred.
