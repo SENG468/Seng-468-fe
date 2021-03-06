@@ -42,9 +42,9 @@ export function Login({ setToken }) {
         'password': password
       };
       const token = await api.userLogin(request);
-      console.log(token)
       setLoadingLogin(false);
       setToken(token);
+      setLoadingLogin(false);
       history.push("/dashboard");
     } catch (e) {
       toast.error("Invalid log-in credentials");

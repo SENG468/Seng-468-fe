@@ -9,7 +9,6 @@ import { Account } from '../Account/Account.js';
 import { Transactions } from '../Transactions/Transactions.js';
 import { Orders } from '../Orders/Orders.js';
 import { ToastContainer } from 'react-toastify';
-import { api as Api } from '../../api/api.js';
 
 export function App() {
   const { token, setToken } = useToken();

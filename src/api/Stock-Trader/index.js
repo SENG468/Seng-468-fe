@@ -34,11 +34,24 @@ export default class StockTrader {
   }
 
   getAccount = async () => {
-    console.log(sessionStorage.getItem('access_token'));
     const url = `${this.baseUrl}/accounts/me`;
     const response = await fetch(url, {
       method: 'GET',
       headers: this.headers({})
+    });
+    return handleErrors(response);
+  }
+
+  addFunds = async (username, amount) => {
+    const body = {
+      'name' : username,
+      'balance' : amount,
+    }
+    const url = `${this.baseUrl}/accounts/add`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: this.headers({}),
+      body: JSON.stringify(body)
     });
     return handleErrors(response);
   }

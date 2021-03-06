@@ -3,6 +3,7 @@ import { useHistory } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Grid, Loader, Segment, Dimmer, Header, Divider, Button, Form } from 'semantic-ui-react';
 import { api } from '../../api/api';
+import { FundsModal } from "./fundsModal.js"
 import './dashboard.css';
 
 export function Dashboard({ setToken }) {
@@ -20,7 +21,6 @@ export function Dashboard({ setToken }) {
         setLoading('Account');
         let userAccount = await api.getAccount();
         setAccount(userAccount);
-        console.log(userAccount);
         setLoading('');
       } catch (e) {
         toast.error("Error Fetching User Account.");
@@ -50,17 +50,6 @@ export function Dashboard({ setToken }) {
     }
   }
 
-  async function handleAddFunds() {
-    try {
-      setLoading('Deposit');
-      // Make call to quote endpoint
-      console.log('Adding Funds.')
-      setLoading('');
-    } catch (e) {
-
-    }
-  }
-
   function handleLogout() {
     setToken("");
     sessionStorage.removeItem('access_token');
@@ -79,7 +68,7 @@ export function Dashboard({ setToken }) {
             <Divider />
             <div style={{display: "flex", justifyContent: "space-between", alignItems: "baseline"}}>
             <Header inverted color="grey" as="h3" content={`Available Cash: $${account.balance}`}/>
-            <Button color="teal" content="Add Funds" onClick={() => handleAddFunds()}/>
+            <Button color="teal" content="Add Funds" onClick={() => setFundsModal(true)}/>
             </div>
             <Divider />
             <Header inverted color="grey" as="h3" content="Portfolio"/>
@@ -108,6 +97,7 @@ export function Dashboard({ setToken }) {
             </Form>
           </Grid.Column>
         </Grid>
+        <FundsModal updateAccount={(updatedAccount) => setAccount(updatedAccount)} account={account} open={fundsModal} handleClose={() => setFundsModal(false)}/>
       </Segment>
     </div>
   )
