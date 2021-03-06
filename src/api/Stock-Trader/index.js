@@ -8,28 +8,45 @@ export default class StockTrader {
   headers = (headers) => {
     return this.jwt ? {
       ...headers,
-      authorization: `Bearer ${this.jwt}`,
+      "Content-Type": "application/json; charset=utf-8",
+      authorization: `${this.jwt}`,
     } : headers;
   }
 
   userLogin = async (credentials) => {
-    const url = `${this.baseUrl}/use-real-endpoint-url-here`; // This is temporary until we have actual endpoints
+    const url = `${this.baseUrl}/users/login`;
     const response = await fetch(url, {
       method: 'POST',
       headers: this.headers({}),
-      body: credentials // temp until endpoints are finalized
+      body: JSON.stringify(credentials)
     });
-    return await response.json();
+    return handleErrors(response);
   }
 
-  handleCreation = async (credentials) => {
-    const url = `${this.baseUrl}/use-real-endpoint-url-here`; // This is temporary until we have actual endpoints
+  userSignup = async (credentials) => {
+    const url = `${this.baseUrl}/users/sign-up`;
     const response = await fetch(url, {
       method: 'POST',
-      headers: this.headers({}),
-      body: credentials // temp until endpoints are finalized
+      headers: this.headers({"Content-Type": "application/json; charset=utf-8"}),
+      body: JSON.stringify(credentials)
     });
-    return await response.json();
+    return handleErrors(response);
+  }
+
+  getAccount = async () => {
+    console.log(sessionStorage.getItem('access_token'));
+    const url = `${this.baseUrl}/accounts/me`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: this.headers({})
+    });
+    return handleErrors(response);
   }
 
 }
+
+function handleErrors(response) {
+    if(!response.ok) throw new Error(response.statusText);
+    return response.json();
+}
+

@@ -4,18 +4,18 @@ export default class StockTraderMock {
     await sleep(500); // Arbitrary sleep duration to mimic response time of server
     return new Promise((resolve, reject) => {
       if (credentials?.username !== '' && credentials?.password !== '') {
-        resolve({ token: 'mock-jwt-token' });
+        resolve({ "access_token": "Bearer 1234" });
       } else {
         reject(new Error('Invalid credentials'));
       }
     });
   }
 
-  registerUser = async (credentials) => {
+  userSignup = async (credentials) => {
     await sleep(500); // Arbitrary sleep duration to mimic response time of server
     return new Promise((resolve, reject) => {
       if (credentials?.username !== '' || credentials?.password !== '') {
-        resolve({ token: 'mock-jwt-token' });
+        resolve({ "access_token": "Bearer 1234" });
       } else {
         reject(new Error('Unable to create account.'));
       }
