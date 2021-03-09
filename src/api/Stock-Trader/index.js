@@ -33,6 +33,15 @@ export default class StockTrader {
     return handleErrors(response);
   }
 
+  getQuote = async (stockSym) => {
+    const url = `${this.baseUrl}/quote/${stockSym}?transactionId=1`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: this.headers({})
+    });
+    return handleErrors(response);
+  }
+
   getAccount = async () => {
     const url = `${this.baseUrl}/accounts/me`;
     const response = await fetch(url, {

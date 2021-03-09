@@ -1,12 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Grid, Loader, Segment, Dimmer } from 'semantic-ui-react';
+
 
 export function Account() {
+  const [loading, setLoading] = useState(false);
+
   return (
-    <h1>
-        Add money,
-        Balance,
-        Account Summary,
-        Button to output user logs to file
-    </h1>
+    <div style={{ padding: "20px" }}>
+      <Segment raised padded inverted>
+        <Dimmer active={loading}>
+          <Loader>Loading...</Loader>
+        </Dimmer>
+        <Grid divided columns={2}>
+          Account stuff, dashboard already covers a lot of what I originally thought would go here
+        </Grid>
+      </Segment>
+    </div>
   )
 }

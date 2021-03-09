@@ -21,7 +21,7 @@ export function App() {
           <div>
             <NavBar setToken={setToken}/>
             <Switch>
-              <Route exact path={["/dashboard"]}>
+              <Route exact path={["/dashboard","/"]}>
                 <Dashboard setToken={setToken}/>
               </Route>
               <Route path="/account">

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { Grid, Loader, Segment, Dimmer, Header, Divider, Button, Form } from 'semantic-ui-react';
+import { Grid, Loader, Segment, Dimmer, Header, Divider, Button, Form, Card, CardDescription } from 'semantic-ui-react';
 import { api } from '../../api/api';
 import { FundsModal } from "./fundsModal.js"
 import './dashboard.css';
@@ -14,6 +14,7 @@ export function Dashboard({ setToken }) {
   const [fundsModal, setFundsModal] = useState(false);
   const [stockSymbol, setStockSymbol] = useState('');
   const [validSymbol, setValidSymbol] = useState(true);
+  const [quotes, setQuotes] = useState([]);
 
   useEffect(() => {
     async function getAccount() {
@@ -42,12 +43,26 @@ export function Dashboard({ setToken }) {
   async function handleQuoteFetch() {
     try {
       setLoading('Quote');
-      // Make call to quote endpoint
-      console.log('Get Quote')
-      setLoading('');
+      let quote = await api.getQuote(stockSymbol);
+      manageQuotes(quote);
     } catch (e) {
-
+      toast.error("Error Fetching Quote.");
+      console.log('Error fetching quote.' + e);
     }
+    setLoading('');
+  }
+
+  function manageQuotes(quote) {
+    let quotesArr = [...quotes];
+    quotesArr.unshift({
+      symbol: stockSymbol,
+      price: quote[stockSymbol]
+    });
+    if (quotesArr.length >= 7) {
+      quotesArr.pop();
+    }
+    setStockSymbol('');
+    setQuotes(quotesArr);
   }
 
   function handleLogout() {
@@ -63,15 +78,15 @@ export function Dashboard({ setToken }) {
           <Loader>{`Loading ${loading}...`}</Loader>
         </Dimmer>
         <Grid divided columns={2}>
-          <Grid.Column width={10} verticalAlign="middle">
+          <Grid.Column width={10} verticalAlign="top">
             <Header color="teal" as="h1" content="Investing Account" />
             <Divider />
-            <div style={{display: "flex", justifyContent: "space-between", alignItems: "baseline"}}>
-            <Header inverted color="grey" as="h3" content={`Available Cash: $${account.balance}`}/>
-            <Button color="teal" content="Add Funds" onClick={() => setFundsModal(true)}/>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+              <Header inverted color="grey" as="h3" content={`Available Cash: $${account.balance}`} />
+              <Button color="teal" content="Add Funds" onClick={() => setFundsModal(true)} />
             </div>
             <Divider />
-            <Header inverted color="grey" as="h3" content="Portfolio"/>
+            <Header inverted color="grey" as="h3" content="Portfolio" />
           </Grid.Column>
           <Grid.Column width={6}>
             <Header color="teal" as="h1" content="Get Quote" />
@@ -83,6 +98,7 @@ export function Dashboard({ setToken }) {
                 iconPosition="left"
                 placeholder="Stock Symbol"
                 value={stockSymbol}
+                type="text"
                 onChange={e => setStockSymbol(e.target.value)}
                 error={validSymbol ? false : "Symbol too long."}
                 action={{
@@ -95,9 +111,22 @@ export function Dashboard({ setToken }) {
                 }}
               />
             </Form>
+            <Divider />
+            <Card.Group color="green" centered items={quotes.map((quote, i) => {
+              return {
+                children: <div style={{margin: "10px"}}>
+                  <Header content={quote.symbol} color="teal" />
+                  <CardDescription content={`Price: $${quote.price}`} />
+                </div>,
+                color: 'teal',
+                fluid: true,
+                className: "quote-cards",
+                key: i
+              }
+            })} />
           </Grid.Column>
         </Grid>
-        <FundsModal updateAccount={(updatedAccount) => setAccount(updatedAccount)} account={account} open={fundsModal} handleClose={() => setFundsModal(false)}/>
+        <FundsModal updateAccount={(updatedAccount) => setAccount(updatedAccount)} account={account} open={fundsModal} handleClose={() => setFundsModal(false)} />
       </Segment>
     </div>
   )

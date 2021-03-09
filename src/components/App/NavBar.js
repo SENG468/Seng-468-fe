@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Menu, Segment } from 'semantic-ui-react';
-import { toast } from 'react-toastify';
 
 export function NavBar({ setToken }) {
   const history = useHistory();
@@ -14,10 +13,9 @@ export function NavBar({ setToken }) {
   }
 
   function handleLogout() {
-    toast.error("Error Fetching User Account.");
+    history.push('/');
     setToken("");
     sessionStorage.removeItem('access_token');
-    history.push('/');
   }
 
   return (
