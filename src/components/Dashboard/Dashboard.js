@@ -1,26 +1,32 @@
 import React, { useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Grid, Loader, Segment, Dimmer, Header, Divider, Button, Form, Card, CardDescription } from 'semantic-ui-react';
 import { api } from '../../api/api';
-import { FundsModal } from "./fundsModal.js"
+import { FundsModal } from "../common/fundsModal.js";
+import { BuyModal } from "../common/buyModal.js"
+import { SellModal } from '../common/sellModal';
+
 import './dashboard.css';
 
-export function Dashboard({ setToken }) {
-  const history = useHistory();
+export function Dashboard() {
 
   const [account, setAccount] = useState({});
   const [loading, setLoading] = useState('');
   const [fundsModal, setFundsModal] = useState(false);
+  const [buyModal, setBuyModal] = useState(false);
+  const [sellModal, setSellModal] = useState(false);
+  const [activeQuote, setActiveQuote] = useState({});
   const [stockSymbol, setStockSymbol] = useState('');
   const [validSymbol, setValidSymbol] = useState(true);
   const [quotes, setQuotes] = useState([]);
+  const [portfolio, setPortfolio] = useState([]);
 
   useEffect(() => {
     async function getAccount() {
       try {
         setLoading('Account');
         let userAccount = await api.getAccount();
+        console.log(userAccount)
         setAccount(userAccount);
         setLoading('');
       } catch (e) {
@@ -65,11 +71,21 @@ export function Dashboard({ setToken }) {
     setQuotes(quotesArr);
   }
 
-  function handleLogout() {
-    setToken("");
-    sessionStorage.removeItem('access_token');
-    history.push('/');
-  }
+  useEffect(() => {
+    function managePortfolio() {
+      if (account.portfolio) {
+        let parsedPortfolio = Object.entries(account.portfolio).map(stock => {
+          return {
+            symbol: stock[0],
+            quantity: stock[1]
+          }
+        })
+        setPortfolio(parsedPortfolio.reverse());
+      }
+    }
+    managePortfolio();
+  }, [account])
+
 
   return (
     <div style={{ padding: "20px" }}>
@@ -81,12 +97,28 @@ export function Dashboard({ setToken }) {
           <Grid.Column width={10} verticalAlign="top">
             <Header color="teal" as="h1" content="Investing Account" />
             <Divider />
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-              <Header inverted color="grey" as="h3" content={`Available Cash: $${account.balance}`} />
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline"}}>
+              <Header inverted color="grey" as="h3" content={`Available Cash: $${account.balance ? (account.balance).toFixed(2) : 0}`} />
               <Button color="teal" content="Add Funds" onClick={() => setFundsModal(true)} />
             </div>
             <Divider />
             <Header inverted color="grey" as="h3" content="Portfolio" />
+            <Card.Group color="green" centered items={portfolio.map((stock, i) => {
+              return {
+                children: <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", margin: "10px", verticalAlign: "center" }}>
+                  <Header content={stock.symbol} color="teal" />
+                  <CardDescription content={`Quantity: ${stock.quantity}`} />
+                  <div>
+                    <Button color="grey" floated="right" content="Sell" />
+                    <Button color="teal" floated="right" content="Buy" />
+                  </div>
+                </div>,
+                color: 'teal',
+                fluid: true,
+                className: "portfolio-cards",
+                key: i
+              }
+            })} />
           </Grid.Column>
           <Grid.Column width={6}>
             <Header color="teal" as="h1" content="Get Quote" />
@@ -114,9 +146,10 @@ export function Dashboard({ setToken }) {
             <Divider />
             <Card.Group color="green" centered items={quotes.map((quote, i) => {
               return {
-                children: <div style={{margin: "10px"}}>
+                children: <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", margin: "10px" }}>
                   <Header content={quote.symbol} color="teal" />
                   <CardDescription content={`Price: $${quote.price}`} />
+                  <Button color="teal" floated="right" content="Buy" onClick={() => { setActiveQuote(quote); setBuyModal(true) }} />
                 </div>,
                 color: 'teal',
                 fluid: true,
@@ -127,6 +160,8 @@ export function Dashboard({ setToken }) {
           </Grid.Column>
         </Grid>
         <FundsModal updateAccount={(updatedAccount) => setAccount(updatedAccount)} account={account} open={fundsModal} handleClose={() => setFundsModal(false)} />
+        <BuyModal quote={activeQuote} updateAccount={(updatedAccount) => setAccount(updatedAccount)} account={account} open={buyModal} handleClose={() => setBuyModal(false)} />
+        <SellModal quote={activeQuote} updateAccount={(updatedAccount) => setAccount(updatedAccount)} account={account} open={sellModal} handleClose={() => setSellModal(false)} />
       </Segment>
     </div>
   )

@@ -2,7 +2,7 @@ div.six.wide.column {
     box-shadow: -2px 0px 0 0 #00b5aca4 !important;
 }
 
-div.ui.teal.fluid.card.quote-cards {
+div.ui.teal.fluid.card.quote-cards,  div.ui.teal.fluid.card.portfolio-cards{
     color: #00b5ad !important;
     background: #333;
 }

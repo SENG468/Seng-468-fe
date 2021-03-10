@@ -12,7 +12,7 @@ export function Account() {
           <Loader>Loading...</Loader>
         </Dimmer>
         <Grid divided columns={2}>
-          Account stuff, dashboard already covers a lot of what I originally thought would go here
+          Maybe just account summary here?
         </Grid>
       </Segment>
     </div>

@@ -65,6 +65,43 @@ export default class StockTrader {
     return handleErrors(response);
   }
 
+  submitSimpleOrder = async (type, symbol, amount) => {
+    const body = {
+      'type' : type,
+      'stockCode' : symbol,
+      'cashAmount': amount
+    }
+    const url = `${this.baseUrl}/order/simple`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: this.headers({}),
+      body: JSON.stringify(body)
+    });
+    return handleErrors(response);
+  }
+
+  commitSimpleBuy = async () => {
+    const body = {}
+    const url = `${this.baseUrl}/buy/commit`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: this.headers({}),
+      body: JSON.stringify(body)
+    });
+    return handleErrors(response);
+  }
+
+  cancelSimpleBuy = async () => {
+    const body = {}
+    const url = `${this.baseUrl}/buy/cancel`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: this.headers({}),
+      body: JSON.stringify(body)
+    });
+    return handleErrors(response);
+  }
+
 }
 
 function handleErrors(response) {

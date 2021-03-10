@@ -13,7 +13,7 @@ export function FundsModal({ open, handleClose, account, updateAccount }) {
       setLoading(true);
       // Make call to add endpoint
       let updatedAccount = await api.addFunds(account.name, funds);
-      console.log('Adding Funds.');
+      toast.success(`Successfully deposited $${funds} into your account.`)
       updateAccount(updatedAccount);
     } catch (e) {
       toast.error("Error depositing funds.");
