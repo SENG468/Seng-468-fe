@@ -1,84 +1,192 @@
 import React, { useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import { Button, Dimmer, Form, Grid, Header, Image, Loader, Message, Segment } from 'semantic-ui-react'
+import { toast } from 'react-toastify';
 import { api } from '../../api/api';
 
-import './Login.css';
 
-export default function Login({ setToken }) {
+export function Login({ setToken }) {
   const [username, setUserName] = useState('');
   const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('');
+  const [invalidEmail, setInvalidEmail] = useState(true);
+  const [securityWord, setSecurityWord] = useState('');
   const [signup, setSignup] = useState(false);
   const [loadingLogin, setLoadingLogin] = useState(false);
   const [loadingRegister, setLoadingRegister] = useState(false);
+  const history = useHistory();
+
+  useEffect(() => {
+    function validateEmail() {
+      // yummy
+      const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      if (email.match(re) || email === '') {
+        setInvalidEmail(false);
+      } else {
+        setInvalidEmail(true);
+      }
+    }
+    validateEmail()
+  }, [email])
+
+  useEffect(() => {
+    clearInputs();
+  }, [signup]);
 
   async function handleLogin() {
     try {
       setLoadingLogin(true);
-      const token = await api.userLogin({
-        username,
-        password
-      });
+      const request = {
+        'username': username,
+        'password': password
+      };
+      const token = await api.userLogin(request);
       setLoadingLogin(false);
       setToken(token);
+      setLoadingLogin(false);
+      history.push("/dashboard");
     } catch (e) {
-      // Handle various errors (invalid name, pw, timeout, etc)
-      console.log(e)
+      toast.error("Invalid log-in credentials");
+      clearInputs();
+      console.log("Invalid Login credentials");
+      setLoadingLogin(false);
     }
   }
 
-  async function handleCreation() {
+  async function userSignup() {
     try {
       setLoadingRegister(true);
-      const token = await api.registerUser({
-        username,
-        password
-      });
+      const request = {
+        'username': username,
+        'password': password,
+        'email': email,
+        'securityCode': securityWord
+      };
+      await api.userSignup(request);
+      await sleep(500);
       setLoadingRegister(false);
-      setToken(token);
+      handleLogin();
     } catch (e) {
-      // Handle various errors (invalid name, pw, timeout, etc)
+      toast.error("Username already in use.");
+      clearInputs();
       console.log(e);
+      setLoadingRegister(false);
     }
   }
 
-  useEffect(() => {
+  function clearInputs() {
     setPassword('');
     setUserName('');
-  }, [signup]);
+    setEmail('');
+    setSecurityWord('');
+    setInvalidEmail(false);
+  }
+
+  function enableSubmit() {
+    if (signup) {
+      return username === '' || password === ''
+        || securityWord === '' || email === ''
+        || invalidEmail
+    } else {
+      return username === '' || password === ''
+    }
+  }
 
   return (
     <div>
-      { !loadingLogin && !loadingRegister ?
-        <div className='login-wrapper'>
-          <h1>{signup ? 'Sign Up' : 'Please Log In'}</h1>
-          <form>
-            <label>
-              <p>Username</p>
-              <input type="text" value={username} onChange={e => setUserName(e.target.value)} />
-            </label>
-            <label>
-              <p>Password</p>
-              <input type="password" value={password} onChange={e => setPassword(e.target.value)} />
-            </label>
-            <div>
+      <Segment inverted>
+        <Dimmer active={loadingLogin || loadingRegister}>
+          <Loader>{signup ? "Creating Account..." : "Logging In..."}</Loader>
+        </Dimmer>
+        <Grid textAlign='center' style={{ height: '100vh' }} verticalAlign='middle'>
+          <Grid.Column style={{ maxWidth: 450 }}>
+            <Header as='h2' color='teal' textAlign='center'>
+              <Image spaced='right' src={signup ? '/favicon_io/rocket-192x192.png' : '/favicon_io/diamond-192x192.png'}/>
+              {signup ? " Sign Up To Start Trading! " : " Login To Your Account "}
+              <Image spaced='left' src={signup ? '/favicon_io/rocket-192x192.png' : '/favicon_io/diamond-192x192.png'} />
+            </Header>
+            <Form size='large'>
+              <Segment stacked>
+                <Form.Input
+                  fluid
+                  icon='user'
+                  iconPosition='left'
+                  placeholder='Username'
+                  value={username}
+                  onChange={e => setUserName(e.target.value)}
+                />
+                {signup ?
+                  <div>
+                    <Form.Input
+                      fluid
+                      icon='mail'
+                      iconPosition='left'
+                      placeholder='E-mail address'
+                      value={email}
+                      onChange={e => setEmail(e.target.value)}
+                      error={invalidEmail ? "Invalid Email" : false}
+                    />
+                    <Form.Input
+                      fluid
+                      icon='lock'
+                      iconPosition='left'
+                      placeholder='Security Phrase'
+                      value={securityWord}
+                      onChange={e => setSecurityWord(e.target.value)}
+                    />
+                    <br />
+                  </div>
+                  : ""}
+                <Form.Input
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  fluid
+                  icon='lock'
+                  iconPosition='left'
+                  placeholder='Password'
+                  type='password'
+                />
+                {signup ?
+                  <Button
+                    fluid
+                    content="Sign Up"
+                    color='teal'
+                    size='large'
+                    disabled={enableSubmit()}
+                    onClick={() => userSignup()}
+                  /> :
+                  <Button
+                    fluid
+                    content="Login"
+                    color='teal'
+                    size='large'
+                    disabled={enableSubmit()}
+                    onClick={() => handleLogin()}
+                  />
+                }
+              </Segment>
+            </Form>
+            <Message>
               {signup ?
-                <button onClick={() => handleCreation()} type="button">{'Sign up'}</button> :
-                <button onClick={() => handleLogin()} type="button">{'Login'}</button>
-              }
-            </div>
-          </form>
-          <br />
-          <p>{signup ? 'Already have an account? Log in' : 'No account? Sign up'}</p>
-          <button type='button' onClick={() => setSignup(!signup)}>{signup ? 'Login' : 'Sign Up'}</button>
-        </div> :
-        loadingLogin ? "Logging in..." : "Registering Account..."
-      }
-
+                "Already have an account? " :
+                "Don't have an account? "}
+              <Button
+                content={signup ? 'Login' : 'Sign Up'}
+                type='text'
+                onClick={() => setSignup(!signup)} />
+            </Message>
+          </Grid.Column>
+        </Grid>
+      </Segment>
     </div>
-
   )
 }
 
 Login.propTypes = {
   setToken: PropTypes.func.isRequired
+}
+
+async function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }

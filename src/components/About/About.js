@@ -1,7 +1,9 @@
 import React from 'react';
 
-export default function About() {
+export function About() {
   return (
-    <h2>About</h2>
+    <h1>
+      Not sure what would go here (placeholder)
+    </h1>
   );
 }
