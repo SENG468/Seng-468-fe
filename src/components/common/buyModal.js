@@ -64,8 +64,23 @@ export function BuyModal({ open, handleClose, account, updateAccount, quote }) {
     setBuyDollarAmount(0);
     setConfirmModal(false);
     setLoading(false);
+    setBuyType('simple')
     handleClose();
   }
+
+  function checkBuyError() {
+    if (buyDollarAmount >= account.balance) {
+      return "Insufficient funds.";
+    }
+    if(buyDollarAmount < 0){
+      return "Invalid buy amount"
+    }
+    if(buyDollarAmount < quote.price && buyDollarAmount > 0){
+      return "Quote higher than funds"
+    }
+    return false;
+  }
+
 
   return (
     <Modal
@@ -77,7 +92,7 @@ export function BuyModal({ open, handleClose, account, updateAccount, quote }) {
       <Dimmer active={loading}>
         <Loader>{"Processing Order..."}</Loader>
       </Dimmer>
-      <Modal.Header children={<Header color="teal" as="h1" content={`Buy ${quote.symbol} at $${quote.price}`} />} />
+      <Modal.Header children={<Header color="teal" as="h1" content={`Buy ${quote.symbol}  ${buyType === 'simple' ? `at $${quote.price}` : ''}`  } />} />
       <Modal.Content>
         <Modal.Description>
           <Header color="grey" as="h3" content={`Current Balance: $${account.balance ? (account.balance).toFixed(2) : 0}`} />
@@ -95,12 +110,27 @@ export function BuyModal({ open, handleClose, account, updateAccount, quote }) {
               labelPosition="right"
               placeholder="0"
               type="number"
+              min="0"
               value={buyDollarAmount}
               onChange={e => setBuyDollarAmount(e.target.value)}
-              error={buyDollarAmount <= account.balance ? false : "Insufficient funds."}
+              error={checkBuyError()}
               disabled={loading}
               focus
             />
+            {buyType === 'trigger' ?
+                <Form.Input
+                icon="dollar"
+                iconPosition="left"
+                label="Trigger Amount: "
+                labelPosition="right"
+                placeholder="0"
+                type="number"
+                value={buyDollarAmount}
+                onChange={e => setBuyDollarAmount(e.target.value)}
+                error={buyDollarAmount <= account.balance ? false : "Insufficient funds."}
+                disabled={loading}
+                focus
+            /> : '' }
           </Form>
           <br />
           <p>{`Total Shares to purchase: ${Math.floor(buyDollarAmount / quote.price)}`}</p>

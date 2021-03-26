@@ -87,6 +87,11 @@ export function Dashboard() {
   }, [account])
 
 
+  async function getStockPrice(symbol) {
+    let q =  await api.getQuote(symbol);
+    return q[symbol];
+  }
+
   return (
     <div style={{ padding: "20px" }}>
       <Segment raised padded inverted>
@@ -109,8 +114,8 @@ export function Dashboard() {
                   <Header content={stock.symbol} color="teal" />
                   <CardDescription content={`Quantity: ${stock.quantity}`} />
                   <div>
-                    <Button color="grey" floated="right" content="Sell" />
-                    <Button color="teal" floated="right" content="Buy" />
+                    <Button onClick={async () => {stock.price = await getStockPrice(stock.symbol); setActiveQuote(stock);setSellModal(true)}} color="grey" floated="right" content="Sell" />
+                    <Button onClick={async () => {stock.price = await getStockPrice(stock.symbol); setActiveQuote(stock);setBuyModal(true)}} color="teal" floated="right" content="Buy" />
                   </div>
                 </div>,
                 color: 'teal',
@@ -160,7 +165,7 @@ export function Dashboard() {
           </Grid.Column>
         </Grid>
         <FundsModal updateAccount={(updatedAccount) => setAccount(updatedAccount)} account={account} open={fundsModal} handleClose={() => setFundsModal(false)} />
-        <BuyModal quote={activeQuote} updateAccount={(updatedAccount) => setAccount(updatedAccount)} account={account} open={buyModal} handleClose={() => setBuyModal(false)} />
+        <BuyModal  quote={activeQuote} updateAccount={(updatedAccount) => setAccount(updatedAccount)} account={account} open={buyModal} handleClose={() => setBuyModal(false)} />
         <SellModal quote={activeQuote} updateAccount={(updatedAccount) => setAccount(updatedAccount)} account={account} open={sellModal} handleClose={() => setSellModal(false)} />
       </Segment>
     </div>

@@ -91,9 +91,31 @@ export default class StockTrader {
     return handleErrors(response);
   }
 
+
+  commitSimpleSell = async () => {
+    const body = {}
+    const url = `${this.baseUrl}/buy/sell`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: this.headers({}),
+      body: JSON.stringify(body)
+    });
+    return handleErrors(response);
+  }
+
   cancelSimpleBuy = async () => {
     const body = {}
     const url = `${this.baseUrl}/buy/cancel`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: this.headers({}),
+      body: JSON.stringify(body)
+    });
+    return handleErrors(response);
+  }
+  cancelSimpleSell = async () => {
+    const body = {}
+    const url = `${this.baseUrl}/sell/cancel`;
     const response = await fetch(url, {
       method: 'POST',
       headers: this.headers({}),
