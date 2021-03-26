@@ -94,7 +94,7 @@ export default class StockTrader {
 
   commitSimpleSell = async () => {
     const body = {}
-    const url = `${this.baseUrl}/buy/sell`;
+    const url = `${this.baseUrl}/sell/commit`;
     const response = await fetch(url, {
       method: 'POST',
       headers: this.headers({}),

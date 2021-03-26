@@ -19,6 +19,7 @@ export function BuyModal({ open, handleClose, account, updateAccount, quote }) {
 
   async function handleSimpleBuy() {
     try {
+      console.log(buyType)
       setLoading(true);
       let transaction = await api.submitSimpleOrder('BUY', quote.symbol, buyDollarAmount);
       toast.success('Buy Order Submitted');
@@ -97,12 +98,13 @@ export function BuyModal({ open, handleClose, account, updateAccount, quote }) {
         <Modal.Description>
           <Header color="grey" as="h3" content={`Current Balance: $${account.balance ? (account.balance).toFixed(2) : 0}`} />
           <Header color="grey" as="h4" content={'Select Buy Type: '} />
-          <Dropdown placeholder="Buy Type" labeled selection options={buyTypes} value={buyType} onChange={(e) => setBuyType(e.target.value)} />
+          <Dropdown placeholder="Buy Type" labeled selection options={buyTypes} value={buyType} onChange={(e,{value}) =>{setBuyType(value)}} />
           <Divider />
           <p>
             Please enter the dollar amount of stock you would like to buy:
         </p>
           <Form>
+            {buyType === 'simple' ?
             <Form.Input
               icon="dollar"
               iconPosition="left"
@@ -116,8 +118,20 @@ export function BuyModal({ open, handleClose, account, updateAccount, quote }) {
               error={checkBuyError()}
               disabled={loading}
               focus
-            />
+            /> : ''}
             {buyType === 'trigger' ?
+                <Form.Input
+                label="Stock Amount: "
+                labelPosition="right"
+                placeholder="0"
+                type="number"
+                value={buyDollarAmount}
+                onChange={e => setBuyDollarAmount(e.target.value)}
+                error={buyDollarAmount <= account.balance ? false : "Insufficient funds."}
+                disabled={loading}
+                focus/>
+                : '' }
+                {buyType === 'trigger' ?
                 <Form.Input
                 icon="dollar"
                 iconPosition="left"
@@ -129,8 +143,8 @@ export function BuyModal({ open, handleClose, account, updateAccount, quote }) {
                 onChange={e => setBuyDollarAmount(e.target.value)}
                 error={buyDollarAmount <= account.balance ? false : "Insufficient funds."}
                 disabled={loading}
-                focus
-            /> : '' }
+                focus/>
+                : '' }
           </Form>
           <br />
           <p>{`Total Shares to purchase: ${Math.floor(buyDollarAmount / quote.price)}`}</p>
@@ -144,7 +158,7 @@ export function BuyModal({ open, handleClose, account, updateAccount, quote }) {
           content="Submit Buy"
           labelPosition='right'
           icon='send'
-          onClick={() => handleSimpleBuy()}
+          onClick={() => buyType === 'simple' ? handleSimpleBuy() : handleTriggerBuy()}
           positive
           disabled={buyDollarAmount < quote.price}
         />

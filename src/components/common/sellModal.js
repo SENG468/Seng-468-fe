@@ -60,7 +60,9 @@ export function SellModal({ open, handleClose, account, updateAccount, quote }) 
     setStockAmount(0);
     setStockValue(0);
     setSellDollarAmount(0);
+    setConfirmModal(false);
     setLoading(false);
+    setSellType('simple')
     handleClose();
   }
 
@@ -79,25 +81,13 @@ export function SellModal({ open, handleClose, account, updateAccount, quote }) 
           <Modal.Description>
             <Header color="grey" as="h3" content={`Current Balance: $${account.balance ? (account.balance).toFixed(2) : 0}`} />
             <Header color="grey" as="h4" content={'Select Sell Type: '} />
-            <Dropdown placeholder="Sell Type" labeled selection options={sellTypes} value={sellType} onChange={(e) => setSellType(e.target.value)} />
+            <Dropdown placeholder="Sell Type" labeled selection options={sellTypes} value={sellType} onChange={(e,{value}) => setSellType(value)} />
             <Divider />
             <p>
               Please enter the dollar amount of stock you would like to sell:
             </p>
             <Form>
-              <Form.Input
-                  icon="dollar"
-                  iconPosition="left"
-                  label="Amount: "
-                  labelPosition="right"
-                  placeholder="0"
-                  type="number"
-                  min="0"
-                  value={sellDollarAmount}
-                  onChange={e => setSellDollarAmount(e.target.value)}
-                  disabled={loading}
-                  focus
-              />
+
               {sellType === 'trigger' ?
                   <Form.Input
                       icon="dollar"
@@ -111,7 +101,19 @@ export function SellModal({ open, handleClose, account, updateAccount, quote }) 
                       error={sellDollarAmount <= account.balance ? false : "Insufficient funds."}
                       disabled={loading}
                       focus
-                  /> : '' }
+                  /> : <Form.Input
+                      icon="dollar"
+                      iconPosition="left"
+                      label="Amount: "
+                      labelPosition="right"
+                      placeholder="0"
+                      type="number"
+                      min="0"
+                      value={sellDollarAmount}
+                      onChange={e => setSellDollarAmount(e.target.value)}
+                      disabled={loading}
+                      focus
+                  /> }
             </Form>
             <br />
             <p>{`Total Shares to sell: ${Math.floor(sellDollarAmount / quote.price)}`}</p>
@@ -125,7 +127,7 @@ export function SellModal({ open, handleClose, account, updateAccount, quote }) 
               content="Submit Sell"
               labelPosition='right'
               icon='send'
-              onClick={async() => await handleSimpleSell()}
+              onClick={() => handleSimpleSell()}
               positive
               disabled={sellDollarAmount < quote.price}
           />
