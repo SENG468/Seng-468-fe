@@ -51,6 +51,15 @@ export default class StockTrader {
     return handleErrors(response);
   }
 
+  getSummary = async () => {
+    const url = `${this.baseUrl}/accounts/displaySummary?transactionId=1`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: this.headers({})
+    });
+    return handleErrors(response);
+  }
+
   addFunds = async (username, amount) => {
     const body = {
       'name' : username,
@@ -102,6 +111,17 @@ export default class StockTrader {
     return handleErrors(response);
   }
 
+  cancelTrigger = async (type, symbol) => {
+    const body = {};
+    const cancelType = type === 'BUY_AT' ? 'setBuy' : 'setSell';
+    const url = `${this.baseUrl}/${cancelType}/cancel/${symbol}`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: this.headers({}),
+      body: JSON.stringify(body)
+    });
+    return handleErrors(response);
+  }
 }
 
 function handleErrors(response) {

@@ -27,6 +27,11 @@ export function NavBar({ setToken }) {
           onClick={() => handleItemClick('/dashboard')}
         />
         <Menu.Item
+          name='transactions'
+          active={activePath === '/transactions'}
+          onClick={() => handleItemClick('/transactions')}
+        />
+        <Menu.Item
           name='account'
           active={activePath === '/account'}
           onClick={() => handleItemClick('/account')}
@@ -35,11 +40,6 @@ export function NavBar({ setToken }) {
           name='manage orders'
           active={activePath === '/orders'}
           onClick={() => handleItemClick('/orders')}
-        />
-        <Menu.Item
-          name='transactions'
-          active={activePath === '/transactions'}
-          onClick={() => handleItemClick('/transactions')}
         />
         <Menu.Item
           name='about'
