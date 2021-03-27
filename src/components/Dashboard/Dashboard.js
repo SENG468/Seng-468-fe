@@ -26,7 +26,6 @@ export function Dashboard() {
       try {
         setLoading('Account');
         let userAccount = await api.getAccount();
-        console.log(userAccount)
         setAccount(userAccount);
         setLoading('');
       } catch (e) {
@@ -86,10 +85,25 @@ export function Dashboard() {
     managePortfolio();
   }, [account])
 
+  async function portfolioAction(symbol, action) {
+    try {
+      setLoading(`${symbol} price`);
+      let quote = await api.getQuote(symbol);
+      setActiveQuote({
+        symbol: symbol,
+        price: quote[symbol]
+      });
+      action === 'Buy' ? setBuyModal(true) : setSellModal(true);
+    } catch (e) {
+      toast.error(`Error Processing ${action}.`);
+      console.log(`Error Processing ${action}. ${e}`);
+    }
+    setLoading('');
+  }
 
   return (
     <div style={{ padding: "20px" }}>
-      <Segment raised padded inverted>
+      <Segment raised padded inverted className='main-segment-style'>
         <Dimmer active={loading !== ''}>
           <Loader>{`Loading ${loading}...`}</Loader>
         </Dimmer>
@@ -97,7 +111,7 @@ export function Dashboard() {
           <Grid.Column width={10} verticalAlign="top">
             <Header color="teal" as="h1" content="Investing Account" />
             <Divider />
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline"}}>
+            <div className='balance-header-div'>
               <Header inverted color="grey" as="h3" content={`Available Cash: $${account.balance ? (account.balance).toFixed(2) : 0}`} />
               <Button color="teal" content="Add Funds" onClick={() => setFundsModal(true)} />
             </div>
@@ -105,12 +119,12 @@ export function Dashboard() {
             <Header inverted color="grey" as="h3" content="Portfolio" />
             <Card.Group color="green" centered items={portfolio.map((stock, i) => {
               return {
-                children: <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", margin: "10px", verticalAlign: "center" }}>
+                children: <div className='portfolio-card-container'>
                   <Header content={stock.symbol} color="teal" />
                   <CardDescription content={`Quantity: ${stock.quantity}`} />
                   <div>
-                    <Button color="grey" floated="right" content="Sell" />
-                    <Button color="teal" floated="right" content="Buy" />
+                    <Button color="grey" floated="right" content="Sell" onClick={() => portfolioAction(stock.symbol, 'Sell')}/>
+                    <Button color="teal" floated="right" content="Buy" onClick={() => portfolioAction(stock.symbol, 'Buy')}/>
                   </div>
                 </div>,
                 color: 'teal',
@@ -146,7 +160,7 @@ export function Dashboard() {
             <Divider />
             <Card.Group color="green" centered items={quotes.map((quote, i) => {
               return {
-                children: <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", margin: "10px" }}>
+                children: <div className='quote-card-container'>
                   <Header content={quote.symbol} color="teal" />
                   <CardDescription content={`Price: $${quote.price}`} />
                   <Button color="teal" floated="right" content="Buy" onClick={() => { setActiveQuote(quote); setBuyModal(true) }} />
