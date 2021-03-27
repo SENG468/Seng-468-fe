@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { api } from './api.js';
 
 export function useToken() {
   const getToken = () => {
@@ -12,7 +13,7 @@ export function useToken() {
   const saveToken = userToken => {
     sessionStorage.setItem('access_token', JSON.stringify(userToken));
     setToken(userToken.access_token);
-    window.location.reload();
+    api.updateToken();
   };
 
   return {

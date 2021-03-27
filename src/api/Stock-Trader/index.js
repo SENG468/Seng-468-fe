@@ -5,6 +5,12 @@ export default class StockTrader {
     this.jwt = jwt;
   }
 
+  updateToken = () => {
+    const tokenString = sessionStorage.getItem('access_token');
+    const userToken = JSON.parse(tokenString);
+    this.jwt = userToken.access_token;
+  }
+
   headers = (headers) => {
     return this.jwt ? {
       ...headers,
