@@ -13,6 +13,7 @@ export function BuyModal({ open, handleClose, account, updateAccount, quote }) {
   const [loading, setLoading] = useState(false);
   const [buyType, setBuyType] = useState('simple')
   const [stockAmount, setStockAmount] = useState(0); // For triggers (number of shares)
+  const [triggerAmount, setTriggerAmount] = useState(0);
   const [stockValue, setStockValue] = useState(0); // For triggers (price per share)
   const [buyDollarAmount, setBuyDollarAmount] = useState(0); // For simple buy/sell
   const [confirmModal, setConfirmModal] = useState(false);
@@ -66,6 +67,7 @@ export function BuyModal({ open, handleClose, account, updateAccount, quote }) {
     setConfirmModal(false);
     setLoading(false);
     setBuyType('simple')
+    setTriggerAmount(0)
     handleClose();
   }
 
@@ -83,7 +85,36 @@ export function BuyModal({ open, handleClose, account, updateAccount, quote }) {
   }
 
 
-  return (
+  async function handleTriggerBuy() {
+    try {
+      console.log(buyType)
+      setLoading(true);
+      let transaction = await api.submitLimitOrder('BUY_AT', quote.symbol, stockAmount);
+      toast.success('Buy Order Submitted');
+      console.log('Simple Buy.');
+      setConfirmModal(true);
+    } catch (e) {
+      toast.error("Error processing order.");
+      console.log("Error processing: " + e);
+    }
+    setLoading(false);
+
+  }
+
+  async function handleLimitBuyCancel() {
+    try {
+        setLoading(true);
+        let transaction = await api.cancelLimitBuy(quote.symbol);
+        toast.success("Buy Order Cancelled");
+        console.log('Simple Buy Cancel.');
+    } catch (e) {
+        toast.error("Error cancelling buy order.");
+        console.log("Error cancelling buy order: " + e);
+    }
+    clearAndClose();
+  }
+
+    return (
     <Modal
       onClose={() => clearAndClose()}
       open={open}
@@ -125,9 +156,10 @@ export function BuyModal({ open, handleClose, account, updateAccount, quote }) {
                 labelPosition="right"
                 placeholder="0"
                 type="number"
-                value={buyDollarAmount}
-                onChange={e => setBuyDollarAmount(e.target.value)}
-                error={buyDollarAmount <= account.balance ? false : "Insufficient funds."}
+                value={stockAmount}
+                min="0"
+                onChange={e => setStockAmount(e.target.value)}
+                error={stockAmount >= 0 ? false : "Invalid number of stocks."}
                 disabled={loading}
                 focus/>
                 : '' }
@@ -139,31 +171,40 @@ export function BuyModal({ open, handleClose, account, updateAccount, quote }) {
                 labelPosition="right"
                 placeholder="0"
                 type="number"
-                value={buyDollarAmount}
-                onChange={e => setBuyDollarAmount(e.target.value)}
-                error={buyDollarAmount <= account.balance ? false : "Insufficient funds."}
+                value={triggerAmount}
+                onChange={e => {setTriggerAmount(e.target.value); quote.price = parseFloat(e.target.value);setBuyDollarAmount(parseFloat(e.target.value) * stockAmount)}}
+                error={triggerAmount <= 0.01 && triggerAmount !== 0? "Invalid trigger amount." : false}
                 disabled={loading}
                 focus/>
                 : '' }
           </Form>
           <br />
-          <p>{`Total Shares to purchase: ${Math.floor(buyDollarAmount / quote.price)}`}</p>
+            { buyType === 'simple' ? <p>{`Total Shares to purchase: ${Math.floor(buyDollarAmount / quote.price)}`}</p> : ''}
           <br />
           <p>{`Note: Number of shares may not be partial. Order will be rounded down to nearest full share, extra funds will be refunded to your account.`}</p>
         </Modal.Description>
       </Modal.Content>
       <Modal.Actions>
         <Button floated="left" content="Cancel" color='red' onClick={() => clearAndClose()} />
-        <Button
+        { buyType === 'trigger' ? <Button
+            content="Submit Buy"
+            labelPosition='right'
+            icon='send'
+            onClick={() => handleTriggerBuy()}
+            positive
+            disabled={triggerAmount < 0 || stockAmount < 1} />
+          : ''}
+        { buyType === 'simple' ?
+          <Button
           content="Submit Buy"
           labelPosition='right'
           icon='send'
-          onClick={() => buyType === 'simple' ? handleSimpleBuy() : handleTriggerBuy()}
+          onClick={() =>  handleSimpleBuy()}
           positive
-          disabled={buyDollarAmount < quote.price}
-        />
+          disabled={buyDollarAmount < quote.price} /> : ''}
       </Modal.Actions>
-      <ConfirmModal open={confirmModal} totalPrice={buyDollarAmount} quote={quote} cancelOrder={() => handleSimpleBuyCancel()} confirmOrder={() => handleSimpleBuyCommit()} />
+      <ConfirmModal open={confirmModal} totalPrice={buyDollarAmount} quote={quote} cancelOrder={() => buyType === 'trigger' ?
+          handleLimitBuyCancel() : handleSimpleBuyCancel()} confirmOrder={() => handleSimpleBuyCommit()} />
     </Modal>
   )
 }

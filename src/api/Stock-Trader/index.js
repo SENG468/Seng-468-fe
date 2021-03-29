@@ -80,6 +80,21 @@ export default class StockTrader {
     return handleErrors(response);
   }
 
+  submitLimitOrder = async (type, symbol, amount) => {
+    const body = {
+      'type' : type,
+      'stockCode' : symbol,
+      'stockAmount': amount
+    }
+    const url = `${this.baseUrl}/order/limit`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: this.headers({}),
+      body: JSON.stringify(body)
+    });
+    return handleErrors(response);
+  }
+
   commitSimpleBuy = async () => {
     const body = {}
     const url = `${this.baseUrl}/buy/commit`;
@@ -113,6 +128,19 @@ export default class StockTrader {
     });
     return handleErrors(response);
   }
+
+  cancelLimitBuy = async (stockSym) => {
+    const body = {}
+    const url = `${this.baseUrl}/setBuy/cancel/${stockSym}`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: this.headers({}),
+      body: JSON.stringify(body)
+    });
+    return handleErrors(response);
+  }
+
+
   cancelSimpleSell = async () => {
     const body = {}
     const url = `${this.baseUrl}/sell/cancel`;
