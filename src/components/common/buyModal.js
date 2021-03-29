@@ -143,7 +143,7 @@ export function BuyModal({ open, handleClose, account, updateAccount, quote }) {
         <Modal.Description>
           <Header color="grey" as="h3" content={`Current Balance: $${account.balance ? (account.balance).toFixed(2) : 0}`} />
           <Header color="grey" as="h4" content={'Select Buy Type: '} />
-          <Dropdown placeholder="Buy Type" labeled selection options={buyTypes} value={buyType} onChange={(e,{value}) =>{setBuyType(value)}} />
+          <Dropdown placeholder="Buy Type" labeled selection options={buyTypes} value={buyType} onChange={(e, {value}) => setBuyType({value})} />
           <Divider />
           <p>
             Please enter the dollar amount of stock you would like to buy:

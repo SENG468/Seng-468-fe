@@ -5,6 +5,12 @@ export default class StockTrader {
     this.jwt = jwt;
   }
 
+  updateToken = () => {
+    const tokenString = sessionStorage.getItem('access_token');
+    const userToken = JSON.parse(tokenString);
+    this.jwt = userToken.access_token;
+  }
+
   headers = (headers) => {
     return this.jwt ? {
       ...headers,
@@ -44,6 +50,15 @@ export default class StockTrader {
 
   getAccount = async () => {
     const url = `${this.baseUrl}/accounts/me`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: this.headers({})
+    });
+    return handleErrors(response);
+  }
+
+  getSummary = async () => {
+    const url = `${this.baseUrl}/accounts/displaySummary?transactionId=1`;
     const response = await fetch(url, {
       method: 'GET',
       headers: this.headers({})
@@ -185,6 +200,17 @@ export default class StockTrader {
     return handleErrors(response);
   }
 
+  cancelTrigger = async (type, symbol) => {
+    const body = {};
+    const cancelType = type === 'BUY_AT' ? 'setBuy' : 'setSell';
+    const url = `${this.baseUrl}/${cancelType}/cancel/${symbol}`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: this.headers({}),
+      body: JSON.stringify(body)
+    });
+    return handleErrors(response);
+  }
 }
 
 function handleErrors(response) {
