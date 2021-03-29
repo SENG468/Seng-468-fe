@@ -95,6 +95,21 @@ export default class StockTrader {
     return handleErrors(response);
   }
 
+  submitLimitOrder = async (type, symbol, amount) => {
+    const body = {
+      'type' : type,
+      'stockCode' : symbol,
+      'stockAmount': amount
+    }
+    const url = `${this.baseUrl}/order/limit`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: this.headers({}),
+      body: JSON.stringify(body)
+    });
+    return handleErrors(response);
+  }
+
   commitSimpleBuy = async () => {
     const body = {}
     const url = `${this.baseUrl}/buy/commit`;
@@ -106,9 +121,77 @@ export default class StockTrader {
     return handleErrors(response);
   }
 
+  commitLimitBuy = async (unitPrice,symbol) => {
+    const body = {unitPrice, stockCode:symbol, type: 'BUY_AT'}
+    const url = `${this.baseUrl}/setBuy/trigger`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: this.headers({}),
+      body: JSON.stringify(body)
+    });
+    return handleErrors(response);
+  }
+
+  commitLimitSell = async (unitPrice,symbol) => {
+    const body = {unitPrice, stockCode:symbol, type: 'SELL_AT'}
+    const url = `${this.baseUrl}/setSell/trigger`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: this.headers({}),
+      body: JSON.stringify(body)
+    });
+    return handleErrors(response);
+  }
+
+
+  commitSimpleSell = async () => {
+    const body = {}
+    const url = `${this.baseUrl}/sell/commit`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: this.headers({}),
+      body: JSON.stringify(body)
+    });
+    return handleErrors(response);
+  }
+
   cancelSimpleBuy = async () => {
     const body = {}
     const url = `${this.baseUrl}/buy/cancel`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: this.headers({}),
+      body: JSON.stringify(body)
+    });
+    return handleErrors(response);
+  }
+
+  cancelLimitBuy = async (stockSym) => {
+    const body = {}
+    const url = `${this.baseUrl}/setBuy/cancel/${stockSym}`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: this.headers({}),
+      body: JSON.stringify(body)
+    });
+    return handleErrors(response);
+  }
+
+
+  cancelSimpleSell = async () => {
+    const body = {}
+    const url = `${this.baseUrl}/sell/cancel`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: this.headers({}),
+      body: JSON.stringify(body)
+    });
+    return handleErrors(response);
+  }
+
+  cancelLimitSell = async (stockSym) => {
+    const body = {}
+    const url = `${this.baseUrl}/setSell/cancel/${stockSym}`;
     const response = await fetch(url, {
       method: 'POST',
       headers: this.headers({}),

@@ -100,7 +100,6 @@ export function Dashboard() {
     }
     setLoading('');
   }
-
   return (
     <div style={{ padding: "20px" }}>
       <Segment raised padded inverted className='main-segment-style'>
@@ -174,7 +173,7 @@ export function Dashboard() {
           </Grid.Column>
         </Grid>
         <FundsModal updateAccount={(updatedAccount) => setAccount(updatedAccount)} account={account} open={fundsModal} handleClose={() => setFundsModal(false)} />
-        <BuyModal quote={activeQuote} updateAccount={(updatedAccount) => setAccount(updatedAccount)} account={account} open={buyModal} handleClose={() => setBuyModal(false)} />
+        <BuyModal  quote={activeQuote} updateAccount={(updatedAccount) => setAccount(updatedAccount)} account={account} open={buyModal} handleClose={() => setBuyModal(false)} />
         <SellModal quote={activeQuote} updateAccount={(updatedAccount) => setAccount(updatedAccount)} account={account} open={sellModal} handleClose={() => setSellModal(false)} />
       </Segment>
     </div>
