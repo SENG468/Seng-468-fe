@@ -114,6 +114,20 @@ export function BuyModal({ open, handleClose, account, updateAccount, quote }) {
     clearAndClose();
   }
 
+  async function handleTriggerBuyCommit() {
+    try {
+        setLoading(true);
+        let freshAccount = await api.commitLimitBuy(triggerAmount,quote.symbol);
+        updateAccount(freshAccount);
+        toast.success("Buy Order Completed");
+        console.log('Simple Buy.');
+    } catch (e) {
+        toast.error("Error committing buy order.");
+        console.log("Error processing: " + e);
+    }
+    clearAndClose();
+  }
+
     return (
     <Modal
       onClose={() => clearAndClose()}
@@ -204,7 +218,7 @@ export function BuyModal({ open, handleClose, account, updateAccount, quote }) {
           disabled={buyDollarAmount < quote.price} /> : ''}
       </Modal.Actions>
       <ConfirmModal open={confirmModal} totalPrice={buyDollarAmount} quote={quote} cancelOrder={() => buyType === 'trigger' ?
-          handleLimitBuyCancel() : handleSimpleBuyCancel()} confirmOrder={() => handleSimpleBuyCommit()} />
+          handleLimitBuyCancel() : handleSimpleBuyCancel()} confirmOrder={() => buyType === 'trigger' ? handleTriggerBuyCommit() : handleSimpleBuyCommit()} />
     </Modal>
   )
 }

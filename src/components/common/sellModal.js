@@ -15,6 +15,7 @@ export function SellModal({ open, handleClose, account, updateAccount, quote }) 
   const [stockValue, setStockValue] = useState(0); // For triggers (price per share)
   const [sellDollarAmount, setSellDollarAmount] = useState(0); // For simple buy/sell
   const [confirmModal, setConfirmModal] = useState(false);
+  const [triggerAmount, setTriggerAmount] = useState(0);
 
   async function handleSimpleSell() {
     try {
@@ -62,8 +63,44 @@ export function SellModal({ open, handleClose, account, updateAccount, quote }) 
     setSellDollarAmount(0);
     setConfirmModal(false);
     setLoading(false);
+    setTriggerAmount(0);
     setSellType('simple')
     handleClose();
+  }
+
+  async function handleTriggerSell() {
+    setLoading(true);
+    let transaction = await api.submitLimitOrder('SELL_AT', quote.symbol, stockAmount);
+    toast.success('Buy Order Submitted');
+    console.log('Simple Buy.');
+    setConfirmModal(true);
+  }
+
+  async function handleTriggerSellCommit() {
+    try {
+      setLoading(true);
+      let freshAccount = await api.commitLimitSell(triggerAmount,quote.symbol);
+      updateAccount(freshAccount);
+      toast.success("Buy Order Completed");
+      console.log('Simple Buy.');
+    } catch (e) {
+      toast.error("Error committing buy order.");
+      console.log("Error processing: " + e);
+    }
+    clearAndClose();
+  }
+
+  async function handleTriggerSellCancel() {
+    try {
+      setLoading(true);
+      let transaction = await api.cancelLimitSell(quote.symbol);
+      toast.success("Buy Order Cancelled");
+      console.log('Simple Buy Cancel.');
+    } catch (e) {
+      toast.error("Error cancelling buy order.");
+      console.log("Error cancelling buy order: " + e);
+    }
+    clearAndClose();
   }
 
   return (
@@ -87,7 +124,19 @@ export function SellModal({ open, handleClose, account, updateAccount, quote }) 
               Please enter the dollar amount of stock you would like to sell:
             </p>
             <Form>
-
+              {sellType === 'trigger' ?
+                  <Form.Input
+                      label="Stock Amount: "
+                      labelPosition="right"
+                      placeholder="0"
+                      type="number"
+                      value={stockAmount}
+                      min="0"
+                      onChange={e => setStockAmount(e.target.value)}
+                      error={stockAmount >= 0 ? false : "Invalid number of stocks."}
+                      disabled={loading}
+                      focus/>
+                  : '' }
               {sellType === 'trigger' ?
                   <Form.Input
                       icon="dollar"
@@ -96,8 +145,8 @@ export function SellModal({ open, handleClose, account, updateAccount, quote }) 
                       labelPosition="right"
                       placeholder="0"
                       type="number"
-                      value={sellDollarAmount}
-                      onChange={e => setSellDollarAmount(e.target.value)}
+                      value={triggerAmount}
+                      onChange={e => {setTriggerAmount(e.target.value); quote.price = parseFloat(e.target.value);setSellDollarAmount(parseFloat(e.target.value) * stockAmount)}}
                       error={sellDollarAmount <= account.balance ? false : "Insufficient funds."}
                       disabled={loading}
                       focus
@@ -116,23 +165,31 @@ export function SellModal({ open, handleClose, account, updateAccount, quote }) 
                   /> }
             </Form>
             <br />
-            <p>{`Total Shares to sell: ${Math.floor(sellDollarAmount / quote.price)}`}</p>
+            { sellType === 'simple' ? <p>{`Total Shares to sell: ${Math.floor(sellDollarAmount / quote.price)}`}  </p> : ''}
             <br />
             <p>{`Note: Number of shares may not be partial. Order will be rounded down to nearest full share, extra funds will be refunded to your account.`}</p>
           </Modal.Description>
         </Modal.Content>
         <Modal.Actions>
           <Button floated="left" content="Cancel" color='red' onClick={() => clearAndClose()} />
-          <Button
-              content="Submit Sell"
-              labelPosition='right'
-              icon='send'
-              onClick={() => handleSimpleSell()}
-              positive
-              disabled={sellDollarAmount < quote.price}
-          />
+          { sellType === 'trigger' ? <Button
+                  content="Submit Sell"
+                  labelPosition='right'
+                  icon='send'
+                  onClick={() => handleTriggerSell()}
+                  positive
+                  disabled={triggerAmount < 0 || stockAmount < 1} />
+              : ''}
+          { sellType === 'simple' ?
+              <Button
+                  content="Submit Buy"
+                  labelPosition='right'
+                  icon='send'
+                  onClick={() =>  handleSimpleSell()}
+                  positive
+                  disabled={sellDollarAmount < quote.price} /> : ''}
         </Modal.Actions>
-        <ConfirmModal open={confirmModal} totalPrice={sellDollarAmount} quote={quote} cancelOrder={() => handleSimpleSellCancel()} confirmOrder={() => handleSimpleSellCommit()} />
+        <ConfirmModal open={confirmModal} totalPrice={sellDollarAmount} quote={quote} cancelOrder={() => sellType === 'simple' ? handleSimpleSellCancel() : handleTriggerSellCancel()} confirmOrder={() => sellType === 'simple' ? handleSimpleSellCommit() : handleTriggerSellCommit()} />
       </Modal>
   )
 }
