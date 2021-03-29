@@ -100,12 +100,6 @@ export function Dashboard() {
     }
     setLoading('');
   }
-
-  async function getStockPrice(symbol) {
-    let q =  await api.getQuote(symbol);
-    return q[symbol];
-  }
-
   return (
     <div style={{ padding: "20px" }}>
       <Segment raised padded inverted className='main-segment-style'>
