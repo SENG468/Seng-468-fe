@@ -3,11 +3,9 @@ import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import { Login } from '../Login/Login.js';
 import { Dashboard } from '../Dashboard/Dashboard.js';
 import { useToken } from '../../api/useToken.js';
-import { About } from '../About/About.js';
 import { NavBar } from './NavBar.js';
-import { Account } from '../Account/Account.js';
+import { Logs } from '../Logs/Logs.js';
 import { Transactions } from '../Transactions/Transactions.js';
-import { Orders } from '../Orders/Orders.js';
 import { ToastContainer } from 'react-toastify';
 
 export function App() {
@@ -24,17 +22,11 @@ export function App() {
               <Route exact path={["/dashboard","/"]}>
                 <Dashboard setToken={setToken}/>
               </Route>
-              <Route path="/account">
-                <Account/>
-              </Route>
-              <Route path="/orders">
-                <Orders/>
+              <Route path="/logs">
+                <Logs/>
               </Route>
               <Route path="/transactions">
                 <Transactions/>
-              </Route>
-              <Route path="/about">
-                <About />
               </Route>
             </Switch>
           </div>

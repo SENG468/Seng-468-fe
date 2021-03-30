@@ -211,6 +211,20 @@ export default class StockTrader {
     });
     return handleErrors(response);
   }
+
+  fetchDumplog = async (username, filename) => {
+    const body = {
+      'filename' : filename,
+      'username' : username
+    };
+    const url = `${this.baseUrl}/logs/dumplog`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: this.headers({}),
+      body: JSON.stringify(body)
+    });
+    return response;
+  }
 }
 
 function handleErrors(response) {

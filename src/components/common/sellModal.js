@@ -12,7 +12,6 @@ export function SellModal({ open, handleClose, account, updateAccount, quote }) 
   const [loading, setLoading] = useState(false);
   const [sellType, setSellType] = useState('simple')
   const [stockAmount, setStockAmount] = useState(0); // For triggers (number of shares)
-  const [stockValue, setStockValue] = useState(0); // For triggers (price per share)
   const [sellDollarAmount, setSellDollarAmount] = useState(0); // For simple buy/sell
   const [confirmModal, setConfirmModal] = useState(false);
   const [triggerAmount, setTriggerAmount] = useState(0);
@@ -20,7 +19,7 @@ export function SellModal({ open, handleClose, account, updateAccount, quote }) 
   async function handleSimpleSell() {
     try {
       setLoading(true);
-      let transaction = await api.submitSimpleOrder('SELL', quote.symbol, sellDollarAmount);
+      await api.submitSimpleOrder('SELL', quote.symbol, sellDollarAmount);
       setConfirmModal(true);
       console.log('Simple Sell.');
     } catch (e) {
@@ -47,7 +46,7 @@ export function SellModal({ open, handleClose, account, updateAccount, quote }) 
   async function handleSimpleSellCancel() {
     try {
       setLoading(true);
-      let transaction = await api.cancelSimpleSell();
+      await api.cancelSimpleSell();
       toast.success("Sell Order Cancelled");
       console.log('Simple Sell Cancel.');
     } catch (e) {
@@ -59,7 +58,6 @@ export function SellModal({ open, handleClose, account, updateAccount, quote }) 
 
   function clearAndClose() {
     setStockAmount(0);
-    setStockValue(0);
     setSellDollarAmount(0);
     setConfirmModal(false);
     setLoading(false);
@@ -70,9 +68,9 @@ export function SellModal({ open, handleClose, account, updateAccount, quote }) 
 
   async function handleTriggerSell() {
     setLoading(true);
-    let transaction = await api.submitLimitOrder('SELL_AT', quote.symbol, stockAmount);
-    toast.success('Buy Order Submitted');
-    console.log('Simple Buy.');
+    await api.submitLimitOrder('SELL_AT', quote.symbol, stockAmount);
+    toast.success('Sell Order Submitted');
+    console.log('Trigger Sell.');
     setConfirmModal(true);
   }
 
@@ -81,10 +79,10 @@ export function SellModal({ open, handleClose, account, updateAccount, quote }) 
       setLoading(true);
       let freshAccount = await api.commitLimitSell(triggerAmount,quote.symbol);
       updateAccount(freshAccount);
-      toast.success("Buy Order Completed");
-      console.log('Simple Buy.');
+      toast.success("Sell Order Completed");
+      console.log('Trigger Sell Commit.');
     } catch (e) {
-      toast.error("Error committing buy order.");
+      toast.error("Error committing sell order.");
       console.log("Error processing: " + e);
     }
     clearAndClose();
@@ -93,12 +91,12 @@ export function SellModal({ open, handleClose, account, updateAccount, quote }) 
   async function handleTriggerSellCancel() {
     try {
       setLoading(true);
-      let transaction = await api.cancelLimitSell(quote.symbol);
-      toast.success("Buy Order Cancelled");
-      console.log('Simple Buy Cancel.');
+      await api.cancelLimitSell(quote.symbol);
+      toast.success("Sell Order Cancelled");
+      console.log('Trigger Sell Cancel.');
     } catch (e) {
-      toast.error("Error cancelling buy order.");
-      console.log("Error cancelling buy order: " + e);
+      toast.error("Error cancelling sell order.");
+      console.log("Error cancelling sell order: " + e);
     }
     clearAndClose();
   }
@@ -113,7 +111,7 @@ export function SellModal({ open, handleClose, account, updateAccount, quote }) 
         <Dimmer active={loading}>
           <Loader>{"Processing Order..."}</Loader>
         </Dimmer>
-        <Modal.Header children={<Header color="teal" as="h1" content={`Sell ${quote.symbol}  ${sellType === 'simple' ? `at $${quote.price}` : ''}`  } />} />
+        <Modal.Header children={<Header color="teal" as="h1" content={`Sell ${quote.symbol}  ${sellType === 'simple' ? `at $${quote.price}` : `- Current Price: $${quote.price}`}`  } />} />
         <Modal.Content>
           <Modal.Description>
             <Header color="grey" as="h3" content={`Current Balance: $${account.balance ? (account.balance).toFixed(2) : 0}`} />
@@ -146,7 +144,7 @@ export function SellModal({ open, handleClose, account, updateAccount, quote }) 
                       placeholder="0"
                       type="number"
                       value={triggerAmount}
-                      onChange={e => {setTriggerAmount(e.target.value); quote.price = parseFloat(e.target.value);setSellDollarAmount(parseFloat(e.target.value) * stockAmount)}}
+                      onChange={e => {setTriggerAmount(e.target.value);setSellDollarAmount(parseFloat(e.target.value) * stockAmount)}}
                       error={sellDollarAmount <= account.balance ? false : "Insufficient funds."}
                       disabled={loading}
                       focus
@@ -182,7 +180,7 @@ export function SellModal({ open, handleClose, account, updateAccount, quote }) 
               : ''}
           { sellType === 'simple' ?
               <Button
-                  content="Submit Buy"
+                  content="Submit Sell"
                   labelPosition='right'
                   icon='send'
                   onClick={() =>  handleSimpleSell()}
