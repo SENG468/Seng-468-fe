@@ -32,19 +32,9 @@ export function NavBar({ setToken }) {
           onClick={() => handleItemClick('/transactions')}
         />
         <Menu.Item
-          name='account'
-          active={activePath === '/account'}
-          onClick={() => handleItemClick('/account')}
-        />
-        <Menu.Item
-          name='manage orders'
-          active={activePath === '/orders'}
-          onClick={() => handleItemClick('/orders')}
-        />
-        <Menu.Item
-          name='about'
-          active={activePath === '/about'}
-          onClick={() => handleItemClick('/about')}
+          name='logs'
+          active={activePath === '/logs'}
+          onClick={() => handleItemClick('/logs')}
         />
         <Menu.Menu position='right'>
           <Menu.Item

@@ -17,6 +17,7 @@ export function Transactions() {
       try {
         setLoading('Account Summary');
         let summary = await api.getSummary();
+        summary.allOpen = summary.openTriggers?.concat(summary.pendingTransactions);
         setSummary(summary);
         setLoading('');
       } catch (e) {
@@ -62,8 +63,8 @@ export function Transactions() {
           <Grid.Column width={8}>
             <Header color="teal" as="h1" content="Open Transactions" />
             <Divider />
-            {summary.pendingTriggers?.length > 0 ?
-              <Card.Group color="green" centered items={summary.pendingTriggers.slice(0).reverse().map((transaction, i) => {
+            {summary.allOpen?.length > 0 ?
+              <Card.Group color="green" centered items={summary.allOpen.slice(0).reverse().map((transaction, i) => {
                 return {
                   children: <div className='portfolio-card-container'>
                     <div style={{ flexBasis: '25%' }}>
@@ -74,7 +75,10 @@ export function Transactions() {
                       <CardDescription content={`Trigger Order: ${transaction.stockAmount} ${transaction.stockCode} @ ${transaction.unitPrice}`} />
                       <CardDescription content={`Total Amount: $${transaction.cashAmount}`} />
                     </div>
-                    <Button color='grey' content='Cancel' onClick={() => handleCancelModal(transaction)} />
+                    {transaction.status === 'PENDING' ?
+                      <Button color='grey' content='Cancel' onClick={() => handleCancelModal(transaction)} /> :
+                      <CardDescription content={friendlyTime(transaction.createdDate)} />
+                    }
                   </div>,
                   color: 'teal',
                   fluid: true,
@@ -106,7 +110,7 @@ export function Transactions() {
                   className: "portfolio-cards",
                   key: i
                 }
-              })} /> : `No Closed Transactions. ${summary.closedTransactions?.length}`
+              })} /> : "No Closed Transactions."
             }
           </Grid.Column>
         </Grid>

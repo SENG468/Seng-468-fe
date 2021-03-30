@@ -14,7 +14,6 @@ export function BuyModal({ open, handleClose, account, updateAccount, quote }) {
   const [buyType, setBuyType] = useState('simple')
   const [stockAmount, setStockAmount] = useState(0); // For triggers (number of shares)
   const [triggerAmount, setTriggerAmount] = useState(0);
-  const [stockValue, setStockValue] = useState(0); // For triggers (price per share)
   const [buyDollarAmount, setBuyDollarAmount] = useState(0); // For simple buy/sell
   const [confirmModal, setConfirmModal] = useState(false);
 
@@ -22,7 +21,7 @@ export function BuyModal({ open, handleClose, account, updateAccount, quote }) {
     try {
       console.log(buyType)
       setLoading(true);
-      let transaction = await api.submitSimpleOrder('BUY', quote.symbol, buyDollarAmount);
+      await api.submitSimpleOrder('BUY', quote.symbol, buyDollarAmount);
       toast.success('Buy Order Submitted');
       console.log('Simple Buy.');
       setConfirmModal(true);
@@ -50,7 +49,7 @@ export function BuyModal({ open, handleClose, account, updateAccount, quote }) {
   async function handleSimpleBuyCancel() {
     try {
       setLoading(true);
-      let transaction = await api.cancelSimpleBuy();
+      await api.cancelSimpleBuy();
       toast.success("Buy Order Cancelled");
       console.log('Simple Buy Cancel.');
     } catch (e) {
@@ -62,7 +61,6 @@ export function BuyModal({ open, handleClose, account, updateAccount, quote }) {
 
   function clearAndClose() {
     setStockAmount(0);
-    setStockValue(0);
     setBuyDollarAmount(0);
     setConfirmModal(false);
     setLoading(false);
@@ -89,9 +87,9 @@ export function BuyModal({ open, handleClose, account, updateAccount, quote }) {
     try {
       console.log(buyType)
       setLoading(true);
-      let transaction = await api.submitLimitOrder('BUY_AT', quote.symbol, stockAmount);
+      await api.submitLimitOrder('BUY_AT', quote.symbol, stockAmount);
       toast.success('Buy Order Submitted');
-      console.log('Simple Buy.');
+      console.log('Trigger Buy.');
       setConfirmModal(true);
     } catch (e) {
       toast.error("Error processing order.");
@@ -104,9 +102,9 @@ export function BuyModal({ open, handleClose, account, updateAccount, quote }) {
   async function handleLimitBuyCancel() {
     try {
         setLoading(true);
-        let transaction = await api.cancelLimitBuy(quote.symbol);
+        await api.cancelLimitBuy(quote.symbol);
         toast.success("Buy Order Cancelled");
-        console.log('Simple Buy Cancel.');
+        console.log('Trigger Buy Cancel.');
     } catch (e) {
         toast.error("Error cancelling buy order.");
         console.log("Error cancelling buy order: " + e);
@@ -120,7 +118,7 @@ export function BuyModal({ open, handleClose, account, updateAccount, quote }) {
         let freshAccount = await api.commitLimitBuy(triggerAmount,quote.symbol);
         updateAccount(freshAccount);
         toast.success("Buy Order Completed");
-        console.log('Simple Buy.');
+        console.log('Trigger Buy Commit.');
     } catch (e) {
         toast.error("Error committing buy order.");
         console.log("Error processing: " + e);
@@ -138,7 +136,7 @@ export function BuyModal({ open, handleClose, account, updateAccount, quote }) {
       <Dimmer active={loading}>
         <Loader>{"Processing Order..."}</Loader>
       </Dimmer>
-      <Modal.Header children={<Header color="teal" as="h1" content={`Buy ${quote.symbol}  ${buyType === 'simple' ? `at $${quote.price}` : ''}`  } />} />
+      <Modal.Header children={<Header color="teal" as="h1" content={`Buy ${quote.symbol}  ${buyType === 'simple' ? `at $${quote.price}` : `- Current Price: $${quote.price}`}`  } />} />
       <Modal.Content>
         <Modal.Description>
           <Header color="grey" as="h3" content={`Current Balance: $${account.balance ? (account.balance).toFixed(2) : 0}`} />
@@ -186,7 +184,7 @@ export function BuyModal({ open, handleClose, account, updateAccount, quote }) {
                 placeholder="0"
                 type="number"
                 value={triggerAmount}
-                onChange={e => {setTriggerAmount(e.target.value); quote.price = parseFloat(e.target.value);setBuyDollarAmount(parseFloat(e.target.value) * stockAmount)}}
+                onChange={e => {setTriggerAmount(e.target.value);setBuyDollarAmount(parseFloat(e.target.value) * stockAmount)}}
                 error={triggerAmount <= 0.01 && triggerAmount !== 0? "Invalid trigger amount." : false}
                 disabled={loading}
                 focus/>
