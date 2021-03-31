@@ -5,7 +5,7 @@ import { Menu, Segment } from 'semantic-ui-react';
 export function NavBar({ setToken }) {
   const history = useHistory();
 
-  const [activePath, setActivePath] = useState("/dashboard");
+  const [activePath, setActivePath] = useState(window.location.pathname);
 
   function handleItemClick(path) {
     history.push(path);
