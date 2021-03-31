@@ -75,7 +75,7 @@ export function Transactions() {
                       <CardDescription content={`Trigger Order: ${transaction.stockAmount} ${transaction.stockCode} @ ${transaction.unitPrice}`} />
                       <CardDescription content={`Total Amount: $${transaction.cashAmount}`} />
                     </div>
-                    {transaction.status === 'PENDING' ?
+                    {transaction.status === 'PENDING' || transaction.status === 'COMMITTED' ?
                       <Button color='grey' content='Cancel' onClick={() => handleCancelModal(transaction)} /> :
                       <CardDescription content={friendlyTime(transaction.createdDate)} />
                     }
@@ -100,8 +100,8 @@ export function Transactions() {
                       <CardDescription content={`Status: ${transaction.status}`} />
                     </div>
                     <div style={{ flexBasis: '45%' }}>
-                      <CardDescription content={`Order: ${transaction.stockAmount} ${transaction.stockCode} @ ${transaction.unitPrice}`} />
-                      <CardDescription content={`Total Amount: $${transaction.cashAmount}`} />
+                      <CardDescription content={`Order: ${transaction.stockAmount} ${transaction.stockCode} @ ${transaction.unitPrice ? transaction.unitPrice : 'N/A'}`} />
+                      <CardDescription content={`Total Amount: ${transaction.cashAmount ? `$${transaction.cashAmount}` : ' N/A'}`} />
                     </div>
                     <CardDescription content={friendlyTime(transaction.createdDate)} />
                   </div>,

@@ -86,13 +86,14 @@ export function Dashboard() {
     managePortfolio();
   }, [account])
 
-  async function portfolioAction(symbol, action) {
+  async function portfolioAction(stock, action) {
     try {
-      setLoading(`${symbol} price`);
-      let quote = await api.getQuote(symbol);
+      setLoading(`${stock.symbol} price`);
+      let quote = await api.getQuote(stock.symbol);
       setActiveQuote({
-        symbol: symbol,
-        price: quote[symbol]
+        symbol: stock.symbol,
+        price: quote[stock.symbol],
+        quantity: stock.quantity
       });
       action === 'Buy' ? setBuyModal(true) : setSellModal(true);
     } catch (e) {
@@ -124,8 +125,8 @@ export function Dashboard() {
                     <Header content={stock.symbol} color="teal" />
                     <CardDescription content={`Quantity: ${stock.quantity}`} />
                     <div>
-                      <Button color="grey" floated="right" content="Sell" onClick={() => portfolioAction(stock.symbol, 'Sell')} />
-                      <Button color="teal" floated="right" content="Buy" onClick={() => portfolioAction(stock.symbol, 'Buy')} />
+                      <Button color="grey" floated="right" content="Sell" onClick={() => portfolioAction(stock, 'Sell')} />
+                      <Button color="teal" floated="right" content="Buy" onClick={() => portfolioAction(stock, 'Buy')} />
                     </div>
                   </div>,
                   color: 'teal',
