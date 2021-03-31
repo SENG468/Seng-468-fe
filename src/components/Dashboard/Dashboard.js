@@ -11,7 +11,7 @@ import './dashboard.css';
 export function Dashboard() {
 
   const [account, setAccount] = useState({});
-  const [loading, setLoading] = useState('');
+  const [loading, setLoading] = useState('Account');
   const [fundsModal, setFundsModal] = useState(false);
   const [buyModal, setBuyModal] = useState(false);
   const [sellModal, setSellModal] = useState(false);
@@ -27,6 +27,7 @@ export function Dashboard() {
         setLoading('Account');
         let userAccount = await api.getAccount();
         setAccount(userAccount);
+        sessionStorage.setItem('user', userAccount.name);
         setLoading('');
       } catch (e) {
         toast.error("Error Fetching User Account.");
@@ -116,22 +117,26 @@ export function Dashboard() {
             </div>
             <Divider />
             <Header inverted color="grey" as="h3" content="Portfolio" />
-            <Card.Group color="green" centered items={portfolio.map((stock, i) => {
-              return {
-                children: <div className='portfolio-card-container'>
-                  <Header content={stock.symbol} color="teal" />
-                  <CardDescription content={`Quantity: ${stock.quantity}`} />
-                  <div>
-                    <Button color="grey" floated="right" content="Sell" onClick={() => portfolioAction(stock.symbol, 'Sell')}/>
-                    <Button color="teal" floated="right" content="Buy" onClick={() => portfolioAction(stock.symbol, 'Buy')}/>
-                  </div>
-                </div>,
-                color: 'teal',
-                fluid: true,
-                className: "portfolio-cards",
-                key: i
-              }
-            })} />
+            {portfolio.length > 0 ?
+              <Card.Group color="green" centered items={portfolio.map((stock, i) => {
+                return {
+                  children: <div className='portfolio-card-container'>
+                    <Header content={stock.symbol} color="teal" />
+                    <CardDescription content={`Quantity: ${stock.quantity}`} />
+                    <div>
+                      <Button color="grey" floated="right" content="Sell" onClick={() => portfolioAction(stock.symbol, 'Sell')} />
+                      <Button color="teal" floated="right" content="Buy" onClick={() => portfolioAction(stock.symbol, 'Buy')} />
+                    </div>
+                  </div>,
+                  color: 'teal',
+                  fluid: true,
+                  className: "portfolio-cards",
+                  key: i
+                }
+              })} />
+              : 'No active holdings.'}
+            <br />
+            <Divider />
           </Grid.Column>
           <Grid.Column width={6}>
             <Header color="teal" as="h1" content="Get Quote" />
@@ -173,7 +178,7 @@ export function Dashboard() {
           </Grid.Column>
         </Grid>
         <FundsModal updateAccount={(updatedAccount) => setAccount(updatedAccount)} account={account} open={fundsModal} handleClose={() => setFundsModal(false)} />
-        <BuyModal  quote={activeQuote} updateAccount={(updatedAccount) => setAccount(updatedAccount)} account={account} open={buyModal} handleClose={() => setBuyModal(false)} />
+        <BuyModal quote={activeQuote} updateAccount={(updatedAccount) => setAccount(updatedAccount)} account={account} open={buyModal} handleClose={() => setBuyModal(false)} />
         <SellModal quote={activeQuote} updateAccount={(updatedAccount) => setAccount(updatedAccount)} account={account} open={sellModal} handleClose={() => setSellModal(false)} />
       </Segment>
     </div>

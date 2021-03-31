@@ -6,7 +6,7 @@ import { CancelModal } from '../common/cancelModal';
 
 
 export function Transactions() {
-  const [loading, setLoading] = useState('');
+  const [loading, setLoading] = useState('Transactions');
   const [summary, setSummary] = useState({});
   const [activeTransaction, setActiveTransaction] = useState({});
   const [cancelModal, setCancelModal] = useState(false);
@@ -15,7 +15,7 @@ export function Transactions() {
   useEffect(() => {
     async function getSummary() {
       try {
-        setLoading('Account Summary');
+        setLoading('Transactions');
         let summary = await api.getSummary();
         summary.allOpen = summary.openTriggers?.concat(summary.pendingTransactions);
         setSummary(summary);

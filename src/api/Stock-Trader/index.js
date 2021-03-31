@@ -33,7 +33,7 @@ export default class StockTrader {
     const url = `${this.baseUrl}/users/sign-up`;
     const response = await fetch(url, {
       method: 'POST',
-      headers: this.headers({"Content-Type": "application/json; charset=utf-8"}),
+      headers: this.headers({ "Content-Type": "application/json; charset=utf-8" }),
       body: JSON.stringify(credentials)
     });
     return handleErrors(response);
@@ -68,8 +68,8 @@ export default class StockTrader {
 
   addFunds = async (username, amount) => {
     const body = {
-      'name' : username,
-      'balance' : amount,
+      'name': username,
+      'balance': amount,
     }
     const url = `${this.baseUrl}/accounts/add`;
     const response = await fetch(url, {
@@ -82,8 +82,8 @@ export default class StockTrader {
 
   submitSimpleOrder = async (type, symbol, amount) => {
     const body = {
-      'type' : type,
-      'stockCode' : symbol,
+      'type': type,
+      'stockCode': symbol,
       'cashAmount': amount
     }
     const url = `${this.baseUrl}/order/simple`;
@@ -97,8 +97,8 @@ export default class StockTrader {
 
   submitLimitOrder = async (type, symbol, amount) => {
     const body = {
-      'type' : type,
-      'stockCode' : symbol,
+      'type': type,
+      'stockCode': symbol,
       'stockAmount': amount
     }
     const url = `${this.baseUrl}/order/limit`;
@@ -121,8 +121,8 @@ export default class StockTrader {
     return handleErrors(response);
   }
 
-  commitLimitBuy = async (unitPrice,symbol) => {
-    const body = {unitPrice, stockCode:symbol, type: 'BUY_AT'}
+  commitLimitBuy = async (unitPrice, symbol) => {
+    const body = { unitPrice, stockCode: symbol, type: 'BUY_AT' }
     const url = `${this.baseUrl}/setBuy/trigger`;
     const response = await fetch(url, {
       method: 'POST',
@@ -132,8 +132,8 @@ export default class StockTrader {
     return handleErrors(response);
   }
 
-  commitLimitSell = async (unitPrice,symbol) => {
-    const body = {unitPrice, stockCode:symbol, type: 'SELL_AT'}
+  commitLimitSell = async (unitPrice, symbol) => {
+    const body = { unitPrice, stockCode: symbol, type: 'SELL_AT' }
     const url = `${this.baseUrl}/setSell/trigger`;
     const response = await fetch(url, {
       method: 'POST',
@@ -214,10 +214,23 @@ export default class StockTrader {
 
   fetchDumplog = async (username, filename) => {
     const body = {
-      'filename' : filename,
-      'username' : username
+      filename: filename,
+      username: username
     };
     const url = `${this.baseUrl}/logs/dumplog`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: this.headers({}),
+      body: JSON.stringify(body)
+    });
+    return response;
+  }
+
+  fetchUserDumplog = async (filename) => {
+    const body = {
+      filename: filename
+    };
+    const url = `${this.baseUrl}/logs/user/dumplog`;
     const response = await fetch(url, {
       method: 'POST',
       headers: this.headers({}),
@@ -228,7 +241,7 @@ export default class StockTrader {
 }
 
 function handleErrors(response) {
-    if(!response.ok) throw new Error(response.statusText);
-    return response.json();
+  if (!response.ok) throw new Error(response.statusText);
+  return response.json();
 }
 
