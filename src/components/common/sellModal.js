@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
-import { Modal, Header, Button, Form, Dimmer, Loader, Dropdown, Divider } from 'semantic-ui-react';
+import { Modal, Header, Button, Form, Dimmer, Loader, Dropdown, Divider, Checkbox } from 'semantic-ui-react';
 import { api } from '../../api/api';
 import { ConfirmModal } from "./confirmModal";
 
@@ -15,6 +15,7 @@ export function SellModal({ open, handleClose, account, updateAccount, quote }) 
   const [sellDollarAmount, setSellDollarAmount] = useState(0); // For simple buy/sell
   const [confirmModal, setConfirmModal] = useState(false);
   const [triggerAmount, setTriggerAmount] = useState(0);
+  const [byAmount, setByAmount] = useState(true);
 
   async function handleSimpleSell() {
     try {
@@ -116,29 +117,67 @@ export function SellModal({ open, handleClose, account, updateAccount, quote }) 
         <Modal.Description>
           <Header color="grey" as="h3" content={`Current Balance: $${account.balance ? (account.balance).toFixed(2) : 0}`} />
           <Header color="grey" as="h4" content={'Select Sell Type: '} />
-          <Dropdown placeholder="Sell Type" labeled selection options={sellTypes} value={sellType} onChange={(e, { value }) => setSellType(value)} />
+          <Dropdown
+            placeholder="Sell Type"
+            labeled
+            selection
+            options={sellTypes}
+            value={sellType}
+            onChange={(e, { value }) => {
+              setSellType(value);
+              setStockAmount(0);
+              setSellDollarAmount(0);
+              setTriggerAmount(0);
+            }}
+          />
           <Divider />
+          {sellType === 'simple' ?
+            <div>
+              <Checkbox
+                label={byAmount ? "Sell by quantity" : "Sell by stock price"}
+                toggle
+                onChange={() => setByAmount(!byAmount)} />
+              <br />
+              <br />
+            </div>
+            : ''}
           <p>
-            {sellType === 'simple' ?
-            "Please enter the dollar amount of stock you would like to sell:":
-            "Please enter the number of shares to purchase:"
-            }
-            </p>
+            {byAmount ? "Please enter the number of shares to sell:" : "Please enter the dollar amount of stock you would like to sell:"}
+          </p>
           {sellType === 'simple' ?
             <Form>
-              <Form.Input
-                icon="dollar"
-                iconPosition="left"
-                label="Amount: "
-                labelPosition="right"
-                placeholder="0"
-                type="number"
-                min="0"
-                value={sellDollarAmount}
-                onChange={e => setSellDollarAmount(e.target.value)}
-                disabled={loading}
-                focus
-              />
+              {byAmount ?
+                <Form.Input
+                  icon="file outline"
+                  iconPosition="left"
+                  label="Number of Shares: "
+                  labelPosition="right"
+                  placeholder="0"
+                  type="number"
+                  min="0"
+                  value={stockAmount}
+                  onChange={(e, { value }) => {
+                    setSellDollarAmount(value * quote.price);
+                    setStockAmount(value);
+                  }}
+                  error={stockAmount > quote.quantity ? "Invalid number of stocks." : false}
+                  disabled={loading}
+                  focus
+                /> :
+                <Form.Input
+                  icon="dollar"
+                  iconPosition="left"
+                  label="Amount: "
+                  labelPosition="right"
+                  placeholder="0"
+                  type="number"
+                  min="0"
+                  value={sellDollarAmount}
+                  onChange={(e, { value }) => setSellDollarAmount(value)}
+                  disabled={loading}
+                  focus
+                />
+              }
             </Form> :
             <Form>
               <Form.Input
@@ -169,7 +208,7 @@ export function SellModal({ open, handleClose, account, updateAccount, quote }) 
                 focus
               /> </Form>}
           <br />
-          {sellType === 'simple' ? <p>{`Total Shares to sell: ${Math.floor(sellDollarAmount / quote.price)}`}  </p> : ''}
+          {sellType === 'simple' ? <p>{byAmount ? `Total sell amount: $${sellDollarAmount}` : `Total Shares to sell: ${Math.floor(sellDollarAmount / quote.price)}`}  </p> : ''}
           <br />
           <p>{`Note: Number of shares may not be partial. Order will be rounded down to nearest full share, extra funds will be refunded to your account.`}</p>
         </Modal.Description>
@@ -192,7 +231,15 @@ export function SellModal({ open, handleClose, account, updateAccount, quote }) 
             positive
             disabled={sellDollarAmount < quote.price} />}
       </Modal.Actions>
-      <ConfirmModal open={confirmModal} totalPrice={sellDollarAmount} quote={quote} cancelOrder={() => sellType === 'simple' ? handleSimpleSellCancel() : handleTriggerSellCancel()} confirmOrder={() => sellType === 'simple' ? handleSimpleSellCommit() : handleTriggerSellCommit()} />
+      {confirmModal ?
+        <ConfirmModal
+          open={confirmModal}
+          totalPrice={sellDollarAmount}
+          type={sellType}
+          unitPrice={sellType === 'simple' ? quote.price : triggerAmount}
+          cancelOrder={() => sellType === 'simple' ? handleSimpleSellCancel() : handleTriggerSellCancel()}
+          confirmOrder={() => sellType === 'simple' ? handleSimpleSellCommit() : handleTriggerSellCommit()}
+        /> : ''}
     </Modal>
   )
 }

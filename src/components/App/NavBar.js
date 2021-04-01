@@ -23,7 +23,7 @@ export function NavBar({ setToken }) {
       <Menu inverted secondary size='large'>
         <Menu.Item
           name='dashboard'
-          active={activePath === '/dashboard'}
+          active={activePath === '/dashboard' || activePath === '/'}
           onClick={() => handleItemClick('/dashboard')}
         />
         <Menu.Item

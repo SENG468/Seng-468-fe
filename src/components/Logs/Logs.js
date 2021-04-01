@@ -17,7 +17,7 @@ export function Logs() {
       api.fetchDumplog(username, filename)
         .then(resp => resp.blob())
         .then(resp => {
-          fileDownload(resp, 'logs.xml');
+          fileDownload(resp, `${filename}.xml`);
           toast.success('Successfully generated logfile');
           setLoading(false);
         });
@@ -33,7 +33,7 @@ export function Logs() {
       api.fetchUserDumplog(filename)
         .then(resp => resp.blob())
         .then(resp => {
-          fileDownload(resp, 'logs.xml');
+          fileDownload(resp, `${filename}.xml`);
           toast.success('Successfully generated logfile');
           setLoading(false);
         });
@@ -66,6 +66,7 @@ export function Logs() {
             <Input
               value={filename}
               type='text'
+              label='File name'
               placeholder='File name'
               onChange={(e, { value }) => setFilename(value)}
             />
