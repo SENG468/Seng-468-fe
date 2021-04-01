@@ -51,7 +51,7 @@ export function Dashboard() {
     try {
       setLoading('Quote');
       let quote = await api.getQuote(stockSymbol);
-      accountFlag(!accountFlag);
+      setAccountFlag(!accountFlag);
       manageQuotes(quote);
     } catch (e) {
       toast.error("Error Fetching Quote.");
