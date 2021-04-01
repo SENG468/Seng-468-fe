@@ -20,6 +20,7 @@ export function Dashboard() {
   const [validSymbol, setValidSymbol] = useState(true);
   const [quotes, setQuotes] = useState([]);
   const [portfolio, setPortfolio] = useState([]);
+  const [accountFlag, setAccountFlag] = useState(false);
 
   useEffect(() => {
     async function getAccount() {
@@ -36,7 +37,7 @@ export function Dashboard() {
       }
     };
     getAccount();
-  }, []);
+  }, [accountFlag]);
 
   useEffect(() => {
     function validateEmail() {
@@ -50,6 +51,7 @@ export function Dashboard() {
     try {
       setLoading('Quote');
       let quote = await api.getQuote(stockSymbol);
+      accountFlag(!accountFlag);
       manageQuotes(quote);
     } catch (e) {
       toast.error("Error Fetching Quote.");
@@ -90,6 +92,7 @@ export function Dashboard() {
     try {
       setLoading(`${stock.symbol} price`);
       let quote = await api.getQuote(stock.symbol);
+      setAccountFlag(!accountFlag);
       setActiveQuote({
         symbol: stock.symbol,
         price: quote[stock.symbol],
