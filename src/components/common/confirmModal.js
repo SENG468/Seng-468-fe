@@ -1,7 +1,22 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal, Header, Button, Divider } from 'semantic-ui-react';
 
-export function ConfirmModal({ open, cancelOrder, confirmOrder, quote, totalPrice }) {
+export function ConfirmModal({ open, cancelOrder, confirmOrder, unitPrice, totalPrice, type }) {
+  const [seconds, setSeconds] = useState(60);
+
+  useEffect(() => {
+    let myInterval = setInterval(() => {
+      if (seconds > 0) {
+        setSeconds(seconds - 1);
+      } else {
+        clearInterval(myInterval);
+        cancelOrder();
+      }
+    }, 850)
+    return () => {
+      clearInterval(myInterval);
+    }
+  });
 
   return (
     <Modal
@@ -14,14 +29,14 @@ export function ConfirmModal({ open, cancelOrder, confirmOrder, quote, totalPric
       <Modal.Content>
         <Modal.Description>
           <Header color="grey" as="h3" content="Order details:" />
-          <Header color="grey" as="h4" content={`Price per share: $${quote.price}`} />
-          <Header color="grey" as="h4" content={`Total Shares: ${Math.floor(totalPrice/quote.price)}`} />
-          <Header color="grey" as="h4" content={`Total Cost: $${Math.floor(totalPrice/quote.price) * quote.price}`} />
-          <Header color="grey" as="h4" content={`Amount returned to account: $${(totalPrice - (Math.floor(totalPrice/quote.price) * quote.price)).toFixed(2)}`} />
-          <Divider/>
+          <Header color="grey" as="h4" content={`Price per share: $${unitPrice}`} />
+          <Header color="grey" as="h4" content={`Total Shares: ${Math.floor(totalPrice / unitPrice)}`} />
+          <Header color="grey" as="h4" content={`Order Total: $${Math.floor(totalPrice / unitPrice) * unitPrice}`} />
+          {type === 'simple' ? <Header color="grey" as="h4" content={`Amount returned to account: $${(totalPrice - (Math.floor(totalPrice / unitPrice) * unitPrice)).toFixed(2)}`} /> : ''}
+          <Divider />
           <p>
-            Please confirm your order. If you do not confirm in 60 seconds, your order will be cancelled.
-        </p>
+            {`Please confirm your order. If you do not confirm in ${seconds} seconds, your order will be cancelled`}
+          </p>
         </Modal.Description>
       </Modal.Content>
       <Modal.Actions>

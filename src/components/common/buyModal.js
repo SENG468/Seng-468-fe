@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
-import { Modal, Header, Button, Form, Dimmer, Loader, Dropdown, Divider } from 'semantic-ui-react';
+import { Modal, Header, Button, Form, Dimmer, Loader, Dropdown, Divider, Checkbox } from 'semantic-ui-react';
 import { ConfirmModal } from './confirmModal.js';
 import { api } from '../../api/api';
 
@@ -16,6 +16,7 @@ export function BuyModal({ open, handleClose, account, updateAccount, quote }) {
   const [triggerAmount, setTriggerAmount] = useState(0);
   const [buyDollarAmount, setBuyDollarAmount] = useState(0); // For simple buy/sell
   const [confirmModal, setConfirmModal] = useState(false);
+  const [byAmount, setByAmount] = useState(true);
 
   async function handleSimpleBuy() {
     try {
@@ -141,30 +142,67 @@ export function BuyModal({ open, handleClose, account, updateAccount, quote }) {
         <Modal.Description>
           <Header color="grey" as="h3" content={`Current Balance: $${account.balance ? (account.balance).toFixed(2) : 0}`} />
           <Header color="grey" as="h4" content={'Select Buy Type: '} />
-          <Dropdown placeholder="Buy Type" labeled selection options={buyTypes} value={buyType} onChange={(e, { value }) => setBuyType(value)} />
+          <Dropdown
+            placeholder="Buy Type"
+            labeled
+            selection
+            options={buyTypes}
+            value={buyType}
+            onChange={(e, { value }) => {
+              setBuyType(value);
+              setStockAmount(0);
+              setBuyDollarAmount(0);
+              setTriggerAmount(0);
+            }} />
           <Divider />
+          {buyType === 'simple' ?
+            <div>
+              <Checkbox
+                label={byAmount ? "Buy by quantity" : "Buy by stock price"}
+                toggle
+                onChange={() => setByAmount(!byAmount)} />
+              <br />
+              <br />
+            </div>
+            : ''}
           <p>
-            {buyType === 'simple' ?
-              "Please enter the dollar amount of stock you would like to buy:" :
-              "Please enter the number of shares to purchase:"
-            }
+            {byAmount ? "Please enter the number of shares to purchase:" : "Please enter the dollar amount of stock you would like to buy:"}
           </p>
           {buyType === 'simple' ?
             <Form>
-              <Form.Input
-                icon="dollar"
-                iconPosition="left"
-                label="Amount: "
-                labelPosition="right"
-                placeholder="0"
-                type="number"
-                min="0"
-                value={buyDollarAmount}
-                onChange={e => setBuyDollarAmount(e.target.value)}
-                error={checkBuyError()}
-                disabled={loading}
-                focus
-              />
+              {byAmount ?
+                <Form.Input
+                  icon="file outline"
+                  iconPosition="left"
+                  label="Number of Shares:"
+                  labelPosition="right"
+                  placeholder="0"
+                  type="number"
+                  min="0"
+                  value={stockAmount}
+                  onChange={(e, { value }) => {
+                    setBuyDollarAmount(value * quote.price);
+                    setStockAmount(value);
+                  }}
+                  error={checkBuyError()}
+                  disabled={loading}
+                  focus
+                /> :
+                <Form.Input
+                  icon="dollar"
+                  iconPosition="left"
+                  label="Amount: "
+                  labelPosition="right"
+                  placeholder="0"
+                  type="number"
+                  min="0"
+                  value={buyDollarAmount}
+                  onChange={(e, { value }) => setBuyDollarAmount(value)}
+                  error={checkBuyError()}
+                  disabled={loading}
+                  focus
+                />
+              }
             </Form> :
             <Form>
               <Form.Input
@@ -195,7 +233,7 @@ export function BuyModal({ open, handleClose, account, updateAccount, quote }) {
                 focus />
             </Form>}
           <br />
-          {buyType === 'simple' ? <p>{`Total Shares to purchase: ${Math.floor(buyDollarAmount / quote.price)}`}</p> : ''}
+          {buyType === 'simple' ? <p>{byAmount ? `Cost of purchase: $${buyDollarAmount}` : `Total Shares to purchase: ${Math.floor(buyDollarAmount / quote.price)}`}</p> : ''}
           <br />
           <p>{`Note: Number of shares may not be partial. Order will be rounded down to nearest full share, extra funds will be refunded to your account.`}</p>
         </Modal.Description>
@@ -219,8 +257,15 @@ export function BuyModal({ open, handleClose, account, updateAccount, quote }) {
             disabled={buyDollarAmount < quote.price}
           />}
       </Modal.Actions>
-      <ConfirmModal open={confirmModal} totalPrice={buyDollarAmount} quote={quote} cancelOrder={() => buyType === 'trigger' ?
-        handleLimitBuyCancel() : handleSimpleBuyCancel()} confirmOrder={() => buyType === 'trigger' ? handleTriggerBuyCommit() : handleSimpleBuyCommit()} />
+      {confirmModal ?
+        <ConfirmModal
+          open={confirmModal}
+          type={buyType}
+          totalPrice={buyDollarAmount}
+          unitPrice={buyType === 'simple' ? quote.price : triggerAmount}
+          cancelOrder={() => buyType === 'trigger' ? handleLimitBuyCancel() : handleSimpleBuyCancel()}
+          confirmOrder={() => buyType === 'trigger' ? handleTriggerBuyCommit() : handleSimpleBuyCommit()}
+        /> : ''}
     </Modal>
   )
 }
